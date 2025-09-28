@@ -1,0 +1,66 @@
+/* Job View Rich Text Styles */
+.job-description.ql-editor {
+  color: rgb(209 213 219); /* text-gray-300 */
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.job-description.ql-editor h1 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+  color: white;
+}
+
+.job-description.ql-editor h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-top: 1.5rem;
+  margin-bottom: 0.75rem;
+  color: white;
+}
+
+.job-description.ql-editor h3 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin-top: 1.25rem;
+  margin-bottom: 0.5rem;
+  color: white;
+}
+
+.job-description.ql-editor p {
+  margin-bottom: 0rem;
+}
+
+.job-description.ql-editor ul,
+.job-description.ql-editor ol {
+  margin-left: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.job-description.ql-editor li {
+  margin-bottom: 0.5rem;
+}
+
+.job-description.ql-editor strong {
+  color: white;
+  font-weight: 600;
+}
+
+.job-description.ql-editor em {
+  font-style: italic;
+}
+
+.job-description.ql-editor u {
+  text-decoration: underline;
+}
+
+.job-description.ql-editor a {
+  color: #60A5FA;
+  text-decoration: none;
+}
+
+.job-description.ql-editor a:hover {
+  text-decoration: underline;
+}

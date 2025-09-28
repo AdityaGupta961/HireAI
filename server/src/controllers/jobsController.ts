@@ -74,22 +74,21 @@ export const getJobById = async (req: Request, res: Response) => {
 export const updateJob = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const updates = { ...req.body };
+    const { clientId, title, companyName, jobDescription, location, expiresAt } =
+      req.body;
 
-    if (!updates || Object.keys(updates).length === 0) {
-      return res.status(400).json({ error: "No updates provided" });
+    if (!clientId || !title || !companyName || !jobDescription) {
+      return res.status(400).json({ error: "Missing required fields" });
     }
-
-    // Remove protected fields
-    delete updates.id;
-    delete updates.client_id;
-    delete updates.shareable_link;
-    delete updates.created_at;
-    delete updates.total_applicants;
 
     const { data, error } = await supabase
       .from("jobs")
-      .update(updates)
+      .update({
+        title,
+        company_name: companyName,
+        job_description: jobDescription,
+        location,
+      })
       .eq("id", id)
       .select()
       .single();

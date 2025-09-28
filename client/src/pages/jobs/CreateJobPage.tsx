@@ -1,21 +1,32 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useAuth } from "../../contexts/AuthContext";
 import { Button, Container, Section, Typography } from "../../components/ui";
 import toast from "react-hot-toast";
 import { FiArrowLeft } from "react-icons/fi";
+import ReactQuill from "react-quill";
+import "react-quill/dist/quill.snow.css";
+import "../../styles/quill.css";
 
 export default function CreateJobPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const location = useLocation();
   const [formData, setFormData] = useState({
-    title: "",
-    companyName: "",
-    jobDescription: "",
-    location: "",
+    title: location.state?.job?.title || "",
+    companyName: location.state?.job?.company_name || "",
+    jobDescription: location.state?.job?.job_description || "",
+    location: location.state?.job?.location || "",
   });
+
+  useEffect(() => {
+    if (location.state?.job) {
+      setIsEditMode(true);
+    }
+  }, [location.state]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -41,34 +52,73 @@ export default function CreateJobPage() {
 
     setIsSubmitting(true);
 
-    try {
-      const res = await fetch("http://localhost:3000/api/jobs", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${sessionStorage.getItem("token") ?? ""}`,
-        },
-        body: JSON.stringify({
-          clientId: user.id,
-          title: formData.title,
-          companyName: formData.companyName,
-          jobDescription: formData.jobDescription,
-          location: formData.location,
-        }),
-      });
+    if (isEditMode && location.state?.job?.id) {
+      // Edit existing job
+      try {
+        const res = await fetch(
+          `http://localhost:3000/api/jobs/${location.state.job.id}`,
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${sessionStorage.getItem("token") ?? ""}`,
+            },
+            body: JSON.stringify({
+              clientId: user.id,
+              title: formData.title,
+              companyName: formData.companyName,
+              jobDescription: formData.jobDescription,
+              location: formData.location,
+            }),
+          }
+        );
 
-      const data = await res.json();
+        const data = await res.json();
 
-      if (!res.ok) {
-        throw new Error(data.error || "Failed to create job");
+        if (!res.ok) {
+          throw new Error(data.error || "Failed to update job");
+        }
+
+        toast.success("Job updated successfully!");
+        navigate("/dashboard");
+      } catch (error: any) {
+        toast.error(error.message || "Error updating job");
+      } finally {
+        setIsSubmitting(false);
       }
+      return;
+    } else {
+      // Create new job
 
-      toast.success("Job created successfully!");
-      navigate("/dashboard");
-    } catch (error: any) {
-      toast.error(error.message || "Error creating job");
-    } finally {
-      setIsSubmitting(false);
+      try {
+        const res = await fetch("http://localhost:3000/api/jobs", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${sessionStorage.getItem("token") ?? ""}`,
+          },
+          body: JSON.stringify({
+            clientId: user.id,
+            title: formData.title,
+            companyName: formData.companyName,
+            jobDescription: formData.jobDescription,
+            location: formData.location,
+          }),
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(data.error || "Failed to create job");
+        }
+
+        toast.success("Job created successfully!");
+        navigate("/dashboard");
+      } catch (error: any) {
+        toast.error(error.message || "Error creating job");
+      } finally {
+        setIsSubmitting(false);
+      }
     }
   };
 
@@ -122,12 +172,21 @@ export default function CreateJobPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
             >
-              <Typography variant="display-large" className="text-white">
-                Create a{" "}
-                <span className="bg-gradient-to-r from-apple-blue to-purple-500 bg-clip-text text-transparent">
-                  New Job Listing
-                </span>
-              </Typography>
+              {!isEditMode ? (
+                <Typography variant="display-large" className="text-white">
+                  Create a{" "}
+                  <span className="bg-gradient-to-r from-apple-blue to-purple-500 bg-clip-text text-transparent">
+                    New Job Listing
+                  </span>
+                </Typography>
+              ) : (
+                <Typography variant="display-large" className="text-white">
+                  Edit{" "}
+                  <span className="bg-gradient-to-r from-apple-blue to-purple-500 bg-clip-text text-transparent">
+                    Job Listing
+                  </span>
+                </Typography>
+              )}
             </motion.div>
 
             <motion.div
@@ -180,15 +239,28 @@ export default function CreateJobPage() {
                   placeholder="Company Name"
                   className="w-full h-14 px-5 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:ring-2 focus:ring-apple-blue focus:border-transparent transition-all duration-300"
                 />
-                <textarea
-                  id="jobDescription"
-                  required
-                  value={formData.jobDescription}
-                  onChange={handleChange}
-                  placeholder="Job Description"
-                  rows={8}
-                  className="w-full rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-500 p-5 resize-y focus:ring-2 focus:ring-apple-blue focus:border-transparent transition-all duration-300"
-                />
+                <div className="quill-wrapper">
+                  <ReactQuill
+                    theme="snow"
+                    value={formData.jobDescription}
+                    onChange={(value) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        jobDescription: value,
+                      }))
+                    }
+                    placeholder="Job Description"
+                    modules={{
+                      toolbar: [
+                        [{ header: [1, 2, 3, false] }],
+                        ["bold", "italic", "underline", "strike"],
+                        [{ list: "ordered" }, { list: "bullet" }],
+                        ["clean"],
+                      ],
+                    }}
+                    className="bg-white/5 border border-white/10 rounded-xl text-white"
+                  />
+                </div>
                 <input
                   type="text"
                   id="location"
@@ -205,7 +277,13 @@ export default function CreateJobPage() {
                   disabled={isSubmitting}
                   className="mt-4"
                 >
-                  {isSubmitting ? "Creating..." : "Create Job"}
+                  {isSubmitting
+                    ? isEditMode
+                      ? "Updating..."
+                      : "Creating..."
+                    : isEditMode
+                    ? "Edit Job"
+                    : "Create Job"}
                 </Button>
               </form>
             </motion.div>

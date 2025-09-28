@@ -5,58 +5,10 @@ import { Button, Container, Section, Typography } from '../../components/ui';
 import toast from 'react-hot-toast';
 import type { Job } from '../../lib/types';
 import { LoadingSpinner } from '../../components/LoadingSpinner';
-
-// Utility for intelligent styling of the job description
-function IntelligentDescription({ text, className = "" }: { text: string; className?: string }) {
-  if (!text) return null;
-
-  const lines = text.split('\n');
-
-  return (
-    <div className={className}>
-      {lines.map((line, idx) => {
-        const trimmed = line.trim();
-
-        // Section headings: line ends with ":" or is all uppercase, min 5 letters
-        if (
-          /^[A-Z\s]{5,}:?$/.test(trimmed) ||
-          (trimmed.endsWith(':') && trimmed.length > 3)
-        ) {
-          return (
-            <Typography key={idx} variant="headline-small" className="text-white mt-6 mb-3">
-              {trimmed.replace(/:$/, '')}
-            </Typography>
-          );
-        }
-
-        // Bullets: - , *, •, or 1. etc.
-        if (
-          /^([-*•])\s/.test(trimmed) ||
-          /^\d+\.\s/.test(trimmed)
-        ) {
-          return (
-            <div key={idx} className="flex items-start ml-5 mb-2">
-              <span className="text-apple-blue mr-2 mt-1">•</span>
-              <Typography variant="body-medium" className="text-gray-300">
-                {trimmed.replace(/^([-*•]|\d+\.)\s/, '')}
-              </Typography>
-            </div>
-          );
-        }
-
-        // Skip empty lines, but preserve paragraph breaks
-        if (trimmed === "") return <div key={idx} className="mb-2" />;
-
-        // Default: paragraph style
-        return (
-          <Typography key={idx} variant="body-medium" className="text-gray-300 mb-2">
-            {trimmed}
-          </Typography>
-        );
-      })}
-    </div>
-  );
-}
+import 'react-quill/dist/quill.snow.css';
+import '../../styles/quill.css';
+import '../../styles/job-view.css';
+import { FiArrowLeft } from 'react-icons/fi';
 
 export default function JobPage() {
   const { shareablelink } = useParams<{ shareablelink: string }>();
@@ -125,6 +77,15 @@ export default function JobPage() {
   return (
     <Section fullScreen>
       <div className="absolute inset-0 overflow-hidden">
+         <button
+                            type="button"
+                            onClick={() => navigate(-1)}
+                            className="absolute top-0 left-0 z-10 flex items-center justify-center w-14 h-14 rounded-full backdrop-blur-lg bg-white/20 border border-white/20 hover:bg-white/30 transition shadow-xl"
+                            aria-label="Back"
+                            style={{ marginTop: '2rem', marginLeft: '2rem' }} // 2rem is ~mt-8/ml-8, tune for perfect alignment
+                          >
+                            <FiArrowLeft className="text-white text-2xl" />
+                          </button>
         <div className="absolute inset-0 bg-gradient-to-br from-apple-black to-apple-gray-dark" />
         <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-10" />
         <motion.div
@@ -161,15 +122,18 @@ export default function JobPage() {
             {job.company_name}
           </Typography>
 
-          <IntelligentDescription text={job.job_description} className="mb-6" />
+          <div 
+            className="ql-editor job-description mb-6 !p-0" 
+            dangerouslySetInnerHTML={{ __html: job.job_description }} 
+          />
 
           {job.location && (
-            <Typography variant="body-medium" color="text-gray-400" className="mb-6">
+            <Typography variant="body-large" color="text-gray-400" className="mb-2">
               <strong>Location:</strong> {job.location}
             </Typography>
           )}
 
-          <Typography variant="body-medium" color="text-gray-400" className="mb-10">
+          <Typography variant="body-large" color="text-gray-400" className="mb-10">
             <strong>Status:</strong> {job.status}
           </Typography>
 
@@ -193,10 +157,10 @@ export default function JobPage() {
                   WebkitBackdropFilter: 'blur(12px)',
                   backdropFilter: 'blur(12px)',
                 }}
-                onClick={() => navigate('/dashboard')}
-                aria-label="Back to dashboard"
+                onClick={() => navigate('/jobs/create', { state: { job } })}
+                aria-label="Edit"
               >
-                Back to Dashboard
+                Edit
               </button>
             )}
           </div>
