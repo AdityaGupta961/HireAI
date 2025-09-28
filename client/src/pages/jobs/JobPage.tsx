@@ -77,7 +77,7 @@ export default function JobPage() {
   return (
     <Section fullScreen>
       <div className="absolute inset-0 overflow-hidden">
-         <button
+         {token && <button
                             type="button"
                             onClick={() => navigate(-1)}
                             className="absolute top-0 left-0 z-10 flex items-center justify-center w-14 h-14 rounded-full backdrop-blur-lg bg-white/20 border border-white/20 hover:bg-white/30 transition shadow-xl"
@@ -85,7 +85,7 @@ export default function JobPage() {
                             style={{ marginTop: '2rem', marginLeft: '2rem' }} // 2rem is ~mt-8/ml-8, tune for perfect alignment
                           >
                             <FiArrowLeft className="text-white text-2xl" />
-                          </button>
+                          </button>}
         <div className="absolute inset-0 bg-gradient-to-br from-apple-black to-apple-gray-dark" />
         <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-10" />
         <motion.div

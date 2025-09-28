@@ -7,6 +7,9 @@ import { FiArrowLeft, FiUploadCloud } from 'react-icons/fi';
 import type { Job } from '../../lib/types';
 import { LoadingSpinner } from '../../components/LoadingSpinner';
 import { uploadFile } from '../../utils/fileUpload'; // Import your LoadingSpinner
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
+import '../../styles/quill.css';
 
 export default function ApplicationPage() {
   const navigate = useNavigate();
@@ -245,15 +248,28 @@ export default function ApplicationPage() {
                   required
                   className="w-full h-14 px-5 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-400 focus:ring-2 focus:ring-apple-blue focus:border-transparent transition-all duration-300"
                 />
-                <textarea
-                  id="coverLetter"
-                  value={formData.coverLetter}
-                  onChange={handleChange}
-                  placeholder="Short Cover Letter or Message"
-                  rows={5}
-                  required
-                  className="w-full rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-400 p-4 resize-y focus:ring-2 focus:ring-apple-blue focus:border-transparent transition-all duration-300"
-                />
+                <div className="quill-wrapper">
+                                  <ReactQuill
+                                    theme="snow"
+                                    value={formData.coverLetter}
+                                    onChange={(value) =>
+                                      setFormData((prev) => ({
+                                        ...prev,
+                                        coverLetter: value,
+                                      }))
+                                    }
+                                    placeholder="Share why you're a great fit for this role"
+                                    modules={{
+                                      toolbar: [
+                                        [{ header: [1, 2, 3, false] }],
+                                        ["bold", "italic", "underline", "strike"],
+                                        [{ list: "ordered" }, { list: "bullet" }],
+                                        ["clean"],
+                                      ],
+                                    }}
+                                    className="bg-white/2 border border-white/10 rounded-xl text-white placeholder-gray-400 focus:ring-2 focus:ring-apple-blue focus:border-transparent transition-all duration-300"
+                                  />
+                                </div>
                 <input
                   type="text"
                   id="linkedin"

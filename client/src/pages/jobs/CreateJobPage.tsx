@@ -258,7 +258,7 @@ export default function CreateJobPage() {
                         ["clean"],
                       ],
                     }}
-                    className="bg-white/5 border border-white/10 rounded-xl text-white"
+                    className="bg-white/2 border border-white/10 rounded-xl text-white"
                   />
                 </div>
                 <input
